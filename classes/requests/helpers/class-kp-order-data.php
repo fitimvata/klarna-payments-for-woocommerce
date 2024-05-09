@@ -91,17 +91,17 @@ class KP_Order_Data {
 	}
 
 	/**
-	 * Returns a formated Klarna order object.
+	 * Returns a formatted Klarna order object.
 	 *
 	 * @param KP_IFrame $iframe_options The options to use for the Klarna Payments iframes.
 	 * @return array
 	 */
-	public function get_klarna_order_object( $iframe_options ) {
+	public function get_klarna_order_object( $iframe_options = null ) {
 		$customer = $this->get_klarna_customer_object();
 
 		return array(
 			'purchase_country'  => $this->klarna_country,
-			'purchase_currency' => get_woocommerce_currency(),
+			'purchase_currency' => empty( $order ) ? get_woocommerce_currency() : $order->get_currency(),
 			'locale'            => kp_get_locale(),
 			'order_amount'      => $this->order_data->get_total(),
 			'order_tax_amount'  => $this->order_data->get_total_tax(),
@@ -109,7 +109,7 @@ class KP_Order_Data {
 			'customer'          => get_klarna_customer( $this->customer_type ),
 			'billing_address'   => $customer['billing'],
 			'shipping_address'  => $customer['shipping'],
-			'options'           => $iframe_options->get_kp_color_options(),
+			'options'           => $iframe_options ? $iframe_options->get_kp_color_options() : array(),
 			'merchant_urls'     => array(
 				'authorization' => home_url( '/wc-api/KP_WC_AUTHORIZATION' ),
 			),
@@ -172,7 +172,7 @@ class KP_Order_Data {
 	}
 
 	/**
-	 * Returns a formated Klarna order line object.
+	 * Returns a formatted Klarna order line object.
 	 *
 	 * @param  \Krokedil\WooCommerce\OrderLineData $order_line The order line data.
 	 * @return array
@@ -228,7 +228,7 @@ class KP_Order_Data {
 	}
 
 	/**
-	 * Returns a formated Klarna customer object.
+	 * Returns a formatted Klarna customer object.
 	 *
 	 * @param  string|null $customer_type The customer type to use for generating the data. If empty it will use the class property instead.
 	 * @return array
@@ -251,7 +251,7 @@ class KP_Order_Data {
 			'postal_code'     => $strip_postcode_spaces ? $customer_data->get_billing_postcode() : str_replace( ' ', '', $customer_data->get_billing_postcode() ),
 			'city'            => $customer_data->get_billing_city(),
 			'region'          => $customer_data->get_billing_state(),
-			'country'         => $customer_data->get_billing_country(),
+			'country'         => empty( $customer_data->get_billing_country() ) ? kp_get_klarna_country() : $customer_data->get_billing_country(),
 		);
 
 		$shipping = array(

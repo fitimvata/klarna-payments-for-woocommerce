@@ -3,11 +3,11 @@ Contributors: klarna, krokedil, automattic
 Tags: woocommerce, klarna, ecommerce, e-commerce
 Donate link: https://klarna.com
 Requires at least: 5.0
-Tested up to: 6.3.2
+Tested up to: 6.5.2
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 8.2.1
-Stable tag: 3.2.3
+WC tested up to: 8.8.2
+Stable tag: 3.5.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -51,6 +51,50 @@ For help setting up and configuring Klarna Payments for WooCommerce please refer
 
 
 == Changelog ==
+= 2024.04.23    - version 3.5.2 =
+* Fix           - Update package version.
+
+= 2024.04.22    - version 3.5.1 =
+* Fix           - Fixed a critical error that happened under certain conditions if the KOSM plugin is active. 
+
+= 2024.04.22    - version 3.5.0 =
+* Feature       - On-site messaging is now part of the Klarna Payments plugin. With this change we've moved to the new Web SDK and resolved deprecation warnings.
+* Tweak         - Redacted sensitive information from the log.
+* Fix           - Fixed an issue where multiple KEC buttons would appear on a variable product page every time the user picked a different variant option.
+* Fix           - Moved to client_key which should resolve the client_id deprecation warning.
+
+= 2024.04.02    - version 3.4.2 =
+* Fix           - Retrieve the currency from the order where applicable. This should enhance compatibility with custom currency switchers.
+* Fix           - Prevent order from being processed more than once through callbacks.
+* Fix           - Resolve an issue where if the customer was redirected back to the store from the hosted payment page, an HTTP 409 error could occur.
+* Tweak         - Use shipping country if the billing country field is unset. Defaults to store location if none is available.
+
+= 2024.03.12    - version 3.4.1 =
+* Fix           - Fixed an issue where the name of the previous payment gateway was set on the order after changing to, and paying with Klarna Payments.
+* Fix           - Setting multiple tax rates with different priorities in WooCommerce tax settings should now work as expected.
+* Fix           - Fixed an issue introduced in WooCommerce version 8.7.0 where a critical error would occur if the cart contained any coupon.
+
+= 2024.01.31    - version 3.4.0 =
+* Feature       - Add support to pass locale to Klarna Express Checkout.
+* Fix           - Klarna Express Checkout will no longer compare the shipping address to the KEC provided address when delivery address is forced to be the billing address.
+* Fix           - Fixed an issue with WooCommerce Subscriptions that would cause a recursion error when canceling a subscription with a Klarna Payments payment method.
+
+= 2024.01.16    - version 3.3.1 =
+* Fix           - Remove the required flag from the KEC client identifier setting.
+
+= 2024.01.15    - version 3.3.0 =
+* Feature       - Added support for Klarna Express Checkout.
+* Feature       - Added support for Post Purchase Upsell.
+* Fix           - Fixed an issue with a undefined index when reading the enabled setting before it has been saved.
+* Tweak         - Changed author and author uri for the plugin.
+
+= 2023.12.06    - version 3.2.4 =
+* Fix           – Added a check to ensure that a Klarna order is always, at most, processed once. This should prevent accidental order re-processing.
+* Fix           - Fixed PHP 8 deprecation warnings.
+* Tweak         - The API password fields in the plugin settings is now treated as a password field.
+* Tweak         - Improved performance when retrieving the order. This is especially noticeable in stores with many orders (thanks @fitimvata!).
+* Tweak         - Added an extra integrity check when verifying AJAX requests.
+
 = 2023.11.07    - version 3.2.3 =
 * Fix           - If Klarna Payment is the preferred payment gateway, the first payment category should be selected by default rather than the last one (current behavior).
 

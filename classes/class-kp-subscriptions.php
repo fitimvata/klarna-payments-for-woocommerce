@@ -44,7 +44,6 @@ class KP_Subscription {
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'show_recurring_token' ) );
 		// Ensure wp_safe_redirect do not redirect back to default dashboard or home page.
 		add_filter( 'allowed_redirect_hosts', array( $this, 'extend_allowed_domains_list' ) );
-
 	}
 
 	/**
@@ -83,7 +82,7 @@ class KP_Subscription {
 		if ( ! is_wp_error( $response ) ) {
 			$klarna_order_id = $response['order_id'];
 			$renewal_order->add_order_note( sprintf( __( 'Subscription payment made with Klarna. Klarna order id: %s', 'klarna-payments-for-woocommerce' ), $klarna_order_id ) );
-			self::save_order_meta_data( $renewal_order, $response );
+			kp_save_order_meta_data( $renewal_order, $response );
 		} else {
 			$error_message = $response->get_error_message();
 			// Translators: Error message.
@@ -104,7 +103,6 @@ class KP_Subscription {
 
 		// Save to the WC order.
 		self::save_recurring_token( $renewal_order->get_id(), $recurring_token );
-
 	}
 
 	/**
@@ -114,10 +112,15 @@ class KP_Subscription {
 	 *
 	 * @see WC_Subscriptions_Change_Payment_Gateway::update_payment_method
 	 *
-	 * @param mixed $subscription WC_Subscription
+	 * @param mixed $subscription WC_Subscription.
 	 * @return void
 	 */
 	public function cancel_scheduled_payment( $subscription ) {
+		// Prevent a recursion of this function when we save the subscription.
+		if ( did_action( 'woocommerce_subscription_cancelled_' . self::GATEWAY_ID ) > 1 ) {
+			return;
+		}
+
 		$recurring_token = $this->get_recurring_tokens( $subscription->get_id() );
 
 		$response = KP_WC()->api->cancel_recurring_order( kp_get_klarna_country( $subscription ), $recurring_token );
@@ -132,7 +135,6 @@ class KP_Subscription {
 		// The session data must be deleted since Klarna doesn't allow reusing a session when generating a new customer token to change payment method.
 		$subscription->delete_meta_data( '_kp_session_data' );
 		$subscription->save();
-
 	}
 
 	/**
@@ -326,25 +328,7 @@ class KP_Subscription {
 		return isset( $_GET['change_payment_method'] );
 	}
 
-	/**
-	 * Process the response from a Klarna request to store meta data about an order.
-	 *
-	 * @param WC_Order $renewal_order The WooCommerce order.
-	 * @param array    $response Response from Klarna request that contain order details.
-	 *
-	 * @return void
-	 */
-	public static function save_order_meta_data( $order, $response ) {
-		$environment = 'yes' === get_option( 'woocommerce_klarna_payments_settings' )['testmode'] ? 'test' : 'live';
 
-		$order->update_meta_data( '_wc_klarna_environment', $environment );
-		$order->update_meta_data( '_wc_klarna_country', kp_get_klarna_country( $order ) );
-		$order->update_meta_data( '_wc_klarna_order_id', $response['order_id'], true );
-		$order->set_transaction_id( $response['order_id'] );
-		$order->set_payment_method_title( 'Klarna' );
-
-		$order->save();
-	}
 
 	/**
 	 * Check if an order contains a subscription.
